@@ -889,12 +889,23 @@ function initializeTypographyDemo() {
     return false;
   }
 
+  function syncDataTheme(isDark) {
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+  }
+
   function updateToggleIcon(btn) {
     const icon = btn.querySelector('.material-icons');
     const isDark = isDarkToggleActive();
     btn.classList.toggle('dark', isDark);
     if (icon) icon.textContent = isDark ? 'dark_mode' : 'light_mode';
+    syncDataTheme(isDark);
   }
+
+  // Sync on load from body class changes localsite may apply after its scripts run.
+  new MutationObserver(function() {
+    syncDataTheme(document.body.classList.contains('dark'));
+  }).observe(document.body, { attributeFilter: ['class'] });
+
   document.querySelectorAll('.typography-toggle').forEach(function(bar) {
     const btn = document.createElement('button');
     btn.className = 'typography-dark-toggle';
@@ -939,6 +950,416 @@ loadScript(local_app.localsite_root() + 'js/navigation.js', function() {
 
 <div id="aboutStyleDivHolder" class="content contentpadding">
   <div id="aboutStyleDiv"></div>
+</div>
+
+<style>
+/* ── CMS UI mockup elements ───────────────────────────────────────────── */
+.cms-preview {
+  max-width: 900px;
+  margin: 0 auto 80px;
+  padding: 0 20px;
+  font-family: var(--sui-font-family-default, var(--font-body, sans-serif));
+  font-size: var(--sui-font-size-default, 14px);
+}
+.cms-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted, var(--sui-secondary-foreground-color, #888));
+  margin: 36px 0 12px;
+}
+
+/* Global toolbar */
+.cms-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 48px;
+  background: var(--sui-primary-background-color, #f5f5f5);
+  border-bottom: 1px solid var(--sui-primary-border-color, #e0e0e0);
+  border-radius: var(--panel-radius, 8px) var(--panel-radius, 8px) 0 0;
+}
+.cms-toolbar .logo-dot {
+  width: 24px; height: 24px;
+  border-radius: 5px;
+  background: var(--sui-primary-accent-color, #5b5bd6);
+  flex-shrink: 0;
+}
+.cms-toolbar .search {
+  flex: 1;
+  max-width: 340px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--sui-secondary-background-color, #eee);
+  border: 1px solid var(--sui-secondary-border-color, #ddd);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: var(--sui-tertiary-foreground-color, #aaa);
+  font-size: 13px;
+  margin: 0 auto;
+}
+.cms-toolbar .icon-btn {
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sui-primary-foreground-color, #333);
+  cursor: pointer;
+  font-size: 18px;
+}
+.cms-toolbar .icon-btn:hover { background: var(--sui-hover-background-color, rgba(0,0,0,.06)); }
+.cms-toolbar .acct {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--sui-primary-accent-color, #5b5bd6);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+
+/* Two-pane layout: sidebar + list */
+.cms-pane-wrap {
+  display: flex;
+  border: 1px solid var(--sui-primary-border-color, #e0e0e0);
+  border-top: none;
+  border-radius: 0 0 var(--panel-radius, 8px) var(--panel-radius, 8px);
+  overflow: hidden;
+  min-height: 280px;
+}
+.cms-sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  background: var(--sui-secondary-background-color, #f5f5f5);
+  border-right: 1px solid var(--sui-primary-border-color, #e0e0e0);
+  padding: 8px 0;
+}
+.cms-sidebar-item {
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--sui-primary-foreground-color, #333);
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 1px 6px;
+}
+.cms-sidebar-item:hover { background: var(--sui-hover-background-color, rgba(0,0,0,.05)); }
+.cms-sidebar-item.active {
+  background: var(--sui-primary-accent-color, #5b5bd6);
+  color: var(--sui-primary-accent-color-inverted, #fff);
+  font-weight: 500;
+}
+.cms-list {
+  flex: 1;
+  background: var(--sui-content-background-color, #fff);
+}
+.cms-list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--sui-primary-border-color, #e5e5e5);
+  background: var(--sui-primary-background-color, #f9f9f9);
+}
+.cms-list-toolbar h3 {
+  font-size: 14px; font-weight: 600; flex: 1; margin: 0;
+  color: var(--sui-primary-foreground-color, #222);
+}
+.cms-list-toolbar .cms-btn-create {
+  padding: 5px 12px;
+  font-size: 12px; font-weight: 500;
+  border: none; border-radius: var(--button-radius, var(--sui-button-medium-border-radius, 6px));
+  background: var(--sui-primary-accent-color, #5b5bd6);
+  color: var(--sui-primary-accent-color-inverted, #fff);
+  cursor: pointer;
+}
+.cms-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--sui-primary-border-color, #f0f0f0);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--sui-primary-foreground-color, #222);
+}
+.cms-entry-row:hover { background: var(--sui-hover-background-color, rgba(0,0,0,.03)); }
+.cms-entry-row.selected { background: var(--sui-selected-background-color, rgba(0,0,0,.07)); }
+.cms-entry-check {
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--sui-control-border-color, #bbb);
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: var(--sui-content-background-color, #fff);
+}
+.cms-entry-check.checked {
+  background: var(--sui-primary-accent-color, #5b5bd6);
+  border-color: var(--sui-primary-accent-color, #5b5bd6);
+}
+.cms-entry-thumb {
+  width: 32px; height: 32px; border-radius: 4px;
+  background: var(--sui-tertiary-background-color, #e8e8e8);
+  flex-shrink: 0;
+}
+.cms-entry-meta { flex: 1; }
+.cms-entry-title { font-weight: 500; margin-bottom: 2px; }
+.cms-entry-date { font-size: 11px; color: var(--sui-secondary-foreground-color, #888); }
+.cms-entry-status {
+  font-size: 11px; padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--chip-bg, var(--sui-tertiary-background-color, #eee));
+  color: var(--chip-text, var(--sui-secondary-foreground-color, #555));
+}
+.cms-entry-status.pub {
+  background: var(--notion-green, #e8f5e8);
+  color: var(--notion-green-text, #2e7d32);
+}
+
+/* Infobar */
+.cms-infobar {
+  padding: 10px 16px;
+  font-size: 13px;
+  border-radius: var(--alert-radius, var(--panel-radius, 8px));
+  border: 1px solid;
+  display: flex; align-items: center; gap: 8px;
+}
+.cms-infobar.info {
+  background: var(--sui-info-background-color, #e8f4fd);
+  border-color: var(--sui-info-border-color, #b3d9f7);
+  color: var(--sui-info-foreground-color, #0c5a8e);
+}
+.cms-infobar.warning {
+  background: var(--sui-warning-background-color, #fff8e1);
+  border-color: var(--sui-warning-border-color, #ffe082);
+  color: var(--sui-warning-foreground-color, #7a5800);
+}
+.cms-infobar.error {
+  background: var(--sui-error-background-color, #fdecea);
+  border-color: var(--sui-error-border-color, #f5c6cb);
+  color: var(--sui-error-foreground-color, #8b1a1a);
+}
+
+/* Entry editor */
+.cms-editor {
+  background: var(--sui-content-background-color, #fff);
+  border: 1px solid var(--sui-primary-border-color, #e0e0e0);
+  border-radius: var(--panel-radius, 8px);
+  overflow: hidden;
+}
+.cms-editor-toolbar {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: var(--sui-primary-background-color, #f5f5f5);
+  border-bottom: 1px solid var(--sui-primary-border-color, #e0e0e0);
+}
+.cms-editor-toolbar h3 { font-size: 14px; font-weight: 600; flex: 1; margin: 0;
+  color: var(--sui-primary-foreground-color, #222); }
+.cms-editor-btn {
+  padding: 5px 12px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;
+  border-radius: var(--button-radius, var(--sui-button-medium-border-radius, 6px));
+}
+.cms-editor-btn.save {
+  background: var(--sui-primary-accent-color, #5b5bd6);
+  color: var(--sui-primary-accent-color-inverted, #fff);
+}
+.cms-editor-btn.ghost {
+  background: transparent;
+  color: var(--sui-secondary-foreground-color, #666);
+  border: 1px solid var(--sui-secondary-border-color, #ddd);
+}
+.cms-field { padding: 14px 16px; border-bottom: 1px solid var(--sui-primary-border-color, #f0f0f0); }
+.cms-field label {
+  display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; margin-bottom: 6px;
+  color: var(--sui-secondary-foreground-color, #666);
+}
+.cms-field input, .cms-field textarea {
+  width: 100%; box-sizing: border-box;
+  padding: 7px 10px; font-size: 14px;
+  background: var(--sui-content-background-color, #fff);
+  border: 1px solid var(--sui-control-border-color, #ddd);
+  border-radius: var(--sui-control-medium-border-radius, 4px);
+  color: var(--sui-primary-foreground-color, #222);
+  font-family: inherit;
+  outline: none;
+}
+.cms-field input:focus, .cms-field textarea:focus {
+  border-color: var(--sui-primary-accent-color, #5b5bd6);
+  box-shadow: 0 0 0 var(--sui-focus-ring-width, 3px) var(--sui-primary-accent-color-translucent, rgba(91,91,214,.2));
+}
+.cms-field textarea { resize: vertical; min-height: 80px; }
+.cms-richtext-toolbar {
+  display: flex; gap: 4px; padding: 6px 8px;
+  background: var(--sui-secondary-background-color, #f5f5f5);
+  border: 1px solid var(--sui-control-border-color, #ddd);
+  border-bottom: none;
+  border-radius: var(--sui-control-medium-border-radius, 4px) var(--sui-control-medium-border-radius, 4px) 0 0;
+}
+.cms-richtext-btn {
+  width: 26px; height: 26px; border: none; border-radius: 4px;
+  background: transparent; cursor: pointer; font-weight: 700; font-size: 13px;
+  color: var(--sui-primary-foreground-color, #333);
+  display: flex; align-items: center; justify-content: center;
+}
+.cms-richtext-btn:hover { background: var(--sui-hover-background-color, rgba(0,0,0,.06)); }
+.cms-richtext-area {
+  border: 1px solid var(--sui-control-border-color, #ddd);
+  border-radius: 0 0 var(--sui-control-medium-border-radius, 4px) var(--sui-control-medium-border-radius, 4px);
+  padding: 10px; font-size: 14px; min-height: 70px;
+  background: var(--sui-content-background-color, #fff);
+  color: var(--sui-primary-foreground-color, #222);
+  line-height: 1.6;
+}
+
+/* Dialog */
+.cms-dialog-backdrop {
+  background: var(--sui-popup-backdrop-color, rgba(0,0,0,.35));
+  border-radius: var(--panel-radius, 8px);
+  padding: 40px 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+.cms-dialog {
+  background: var(--sui-content-background-color, #fff);
+  border-radius: var(--panel-radius, 8px);
+  box-shadow: 0 8px 32px var(--sui-popup-shadow-color, rgba(0,0,0,.2));
+  width: 360px; max-width: 100%;
+  overflow: hidden;
+}
+.cms-dialog-header {
+  padding: 16px 20px 0;
+  font-size: 15px; font-weight: 600;
+  color: var(--sui-primary-foreground-color, #222);
+}
+.cms-dialog-body {
+  padding: 10px 20px 16px;
+  font-size: 13px; color: var(--sui-secondary-foreground-color, #555);
+  line-height: 1.5;
+}
+.cms-dialog-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 12px 16px;
+  background: var(--sui-secondary-background-color, #f5f5f5);
+  border-top: 1px solid var(--sui-primary-border-color, #e5e5e5);
+}
+</style>
+
+<div class="cms-preview">
+
+  <div class="cms-section-label">Global Toolbar</div>
+  <div class="cms-toolbar">
+    <div class="logo-dot"></div>
+    <div class="cms-toolbar" style="gap:4px;border:none;background:transparent;padding:0;height:auto;flex-shrink:0">
+      <div class="cms-sidebar-item active" style="margin:0;padding:4px 10px;font-size:12px">Posts</div>
+      <div class="cms-sidebar-item" style="margin:0;padding:4px 10px;font-size:12px">Assets</div>
+    </div>
+    <div class="search">🔍 Search…</div>
+    <div class="icon-btn">＋</div>
+    <div class="icon-btn">🔔</div>
+    <div class="acct">M</div>
+  </div>
+
+  <div class="cms-section-label">Collection List + Entry Rows</div>
+  <div class="cms-pane-wrap">
+    <div class="cms-sidebar">
+      <div class="cms-sidebar-item active">Posts</div>
+      <div class="cms-sidebar-item">Pages</div>
+      <div class="cms-sidebar-item">Authors</div>
+      <div class="cms-sidebar-item">Settings</div>
+    </div>
+    <div class="cms-list">
+      <div class="cms-list-toolbar">
+        <h3>Posts <span style="opacity:.5;font-weight:400">12</span></h3>
+        <button class="cms-btn-create">+ Create</button>
+      </div>
+      <div class="cms-entry-row selected">
+        <div class="cms-entry-check checked"></div>
+        <div class="cms-entry-thumb"></div>
+        <div class="cms-entry-meta">
+          <div class="cms-entry-title">Getting Started with Sveltia CMS</div>
+          <div class="cms-entry-date">Apr 25, 2026</div>
+        </div>
+        <div class="cms-entry-status pub">Published</div>
+      </div>
+      <div class="cms-entry-row">
+        <div class="cms-entry-check"></div>
+        <div class="cms-entry-thumb"></div>
+        <div class="cms-entry-meta">
+          <div class="cms-entry-title">Theming with CSS Variables</div>
+          <div class="cms-entry-date">Apr 20, 2026</div>
+        </div>
+        <div class="cms-entry-status">Draft</div>
+      </div>
+      <div class="cms-entry-row">
+        <div class="cms-entry-check"></div>
+        <div class="cms-entry-thumb"></div>
+        <div class="cms-entry-meta">
+          <div class="cms-entry-title">Contributing to Open Source</div>
+          <div class="cms-entry-date">Apr 12, 2026</div>
+        </div>
+        <div class="cms-entry-status">Draft</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cms-section-label">Entry Editor</div>
+  <div class="cms-editor">
+    <div class="cms-editor-toolbar">
+      <h3>Posts › Getting Started with Sveltia CMS</h3>
+      <button class="cms-editor-btn ghost">Preview</button>
+      <button class="cms-editor-btn save">Save</button>
+    </div>
+    <div class="cms-field">
+      <label>Title</label>
+      <input type="text" value="Getting Started with Sveltia CMS">
+    </div>
+    <div class="cms-field">
+      <label>Slug</label>
+      <input type="text" value="getting-started-with-sveltia-cms">
+    </div>
+    <div class="cms-field">
+      <label>Body</label>
+      <div class="cms-richtext-toolbar">
+        <button class="cms-richtext-btn">B</button>
+        <button class="cms-richtext-btn"><em>I</em></button>
+        <button class="cms-richtext-btn" style="text-decoration:underline">U</button>
+        <button class="cms-richtext-btn">H1</button>
+        <button class="cms-richtext-btn">H2</button>
+        <button class="cms-richtext-btn">🔗</button>
+        <button class="cms-richtext-btn">📷</button>
+      </div>
+      <div class="cms-richtext-area">This is an example rich text entry body. Content is committed directly to your <strong>GitHub repository</strong> as Markdown.</div>
+    </div>
+    <div class="cms-field">
+      <label>Date</label>
+      <input type="text" value="2026-04-25">
+    </div>
+  </div>
+
+  <div class="cms-section-label">Infobars</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="cms-infobar info">ℹ️ &nbsp;Your changes are saved automatically as a local backup.</div>
+    <div class="cms-infobar warning">⚠️ &nbsp;You are approaching the entry quota (48 of 50 used).</div>
+    <div class="cms-infobar error">✕ &nbsp;Authentication failed. Please check your access token and try again.</div>
+  </div>
+
+  <div class="cms-section-label">Dialog</div>
+  <div class="cms-dialog-backdrop">
+    <div class="cms-dialog">
+      <div class="cms-dialog-header">Sign in using access token</div>
+      <div class="cms-dialog-body">
+        Enter a personal access token for GitHub. The token is stored only in your browser.
+        <br><br>
+        <input type="text" placeholder="ghp_xxxxxxxxxxxx"
+          style="width:100%;box-sizing:border-box;padding:7px 10px;font-size:13px;border:1px solid var(--sui-control-border-color,#ddd);border-radius:var(--sui-control-medium-border-radius,4px);background:var(--sui-content-background-color,#fff);color:var(--sui-primary-foreground-color,#222);font-family:inherit">
+      </div>
+      <div class="cms-dialog-footer">
+        <button class="cms-editor-btn ghost">Cancel</button>
+        <button class="cms-editor-btn save">Sign in</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 </body>
