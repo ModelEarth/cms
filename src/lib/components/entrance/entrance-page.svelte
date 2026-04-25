@@ -31,7 +31,9 @@
 <div role="none" class="container">
   <div role="none" class="inner">
     {#if $cmsConfigLoaded}
-      <img src={$appLogoURL} alt="" class="logo" />
+      {#if $cmsConfig?.logo?.show_in_intro ?? true}
+        <img src={$appLogoURL} alt="" class="logo" />
+      {/if}
       <h1>{$appTitle}</h1>
     {/if}
     {#if $cmsConfigErrors.length}

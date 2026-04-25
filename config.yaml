@@ -1,0 +1,9 @@
+# Site-level config — placeholder. Overwrite this at your webroot's /config.yaml.
+# sveltia-cms and themes/index.html fetch /config.yaml at runtime;
+# this file is only used when sveltia-cms itself is the webroot.
+
+extra_css: []
+  # - /your-site/css/base.css
+
+extra_js: []
+  # - /your-site/js/main.js

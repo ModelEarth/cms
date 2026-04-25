@@ -8,6 +8,7 @@
   import MainRouter from '$lib/components/global/main-router.svelte';
   import { appLogoType, appLogoURL, appTitle } from '$lib/services/app/branding';
   import { initAppLocale } from '$lib/services/app/i18n';
+  import { fetchSiteConfig } from '$lib/services/config/site-config';
   import { announcedPageStatus, startViewTransition } from '$lib/services/app/navigation';
   import { backend } from '$lib/services/backends';
   import { cmsConfigLoaded, DEV_SITE_URL, initCmsConfig } from '$lib/services/config';
@@ -48,6 +49,24 @@
 
   $effect(() => {
     initCmsConfig(config);
+  });
+
+  /** @type {string[]} */
+  let extraCSS = $state([]);
+
+  $effect.pre(() => {
+    fetchSiteConfig().then(({ extra_css = [], extra_js = [] }) => {
+      extraCSS = extra_css;
+
+      extra_js.forEach((src) => {
+        if (!document.querySelector(`script[src="${src}"]`)) {
+          const s = document.createElement('script');
+          s.src = src;
+          s.async = true;
+          document.head.appendChild(s);
+        }
+      });
+    });
   });
 
   // Fix the position of the custom mount element if needed
@@ -97,6 +116,9 @@
   {#if DEV_SITE_URL}
     <link href="{DEV_SITE_URL}/admin/config.yml" type="application/yaml" rel="cms-config-url" />
   {/if}
+  {#each extraCSS as href (href)}
+    <link rel="stylesheet" {href} />
+  {/each}
 </svelte:head>
 
 <svelte:body

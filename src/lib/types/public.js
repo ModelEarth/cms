@@ -1531,6 +1531,7 @@
  * @property {string} src Absolute URL or absolute path to the site logo that will be displayed on
  * the entrance page and the browser’s tab (favicon). A square image works best.
  * @property {boolean} [show_in_header] Whether to show the logo in the header. Default: `true`.
+ * @property {boolean} [show_in_intro] Whether to show the logo on the entrance (sign-in) page. Default: `true`.
  */
 
 /**
@@ -1624,6 +1625,10 @@
  * DEPRECATED: This option is superseded by the new `logo.src` option. See the documentation
  * https://sveltiacms.app/en/docs/customization#custom-logo for details.
  * @property {LogoOptions} [logo] Site logo options.
+ * @property {string[]} [extra_css] Absolute URLs or paths to additional stylesheets to inject into
+ * the page. Loaded before the CMS renders, so styles apply immediately.
+ * @property {string[]} [extra_js] Absolute URLs or paths to additional scripts to inject into the
+ * page. Loaded asynchronously alongside the CMS.
  * @property {string} [logout_redirect_url] URL to redirect users to after logging out.
  * @property {IssueReports} [issue_reports] Issue reporting options.
  * @property {boolean} [show_preview_links] Whether to show site preview links. Default: `true`.
