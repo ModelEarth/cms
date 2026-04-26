@@ -241,7 +241,11 @@ if (typeof waitForElm !== 'function') {
 }
 if (typeof loadScript !== 'function') {
   window.loadScript = function(src, cb) {
+    var id = src.replace(/^[a-z]{4,5}:\/\/[^/]+/, '');
+    if (id && id[0] !== '/') id = '/' + id;
+    if (document.getElementById(id)) { if (cb) cb(); return; }
     var s = document.createElement('script');
+    if (id) s.id = id;
     s.src = src;
     if (cb) s.onload = cb;
     document.head.appendChild(s);
@@ -927,25 +931,44 @@ function initializeTypographyDemo() {
   });
 })();
 
-// Hide typography-toggle on scroll down, reveal on scroll up (fixed at top via sticky)
+// Fix typography-toggle below nav header on scroll; revert to static at top
 (function() {
-  const bar = document.querySelector('.typography-toggle');
+  var bar = document.querySelector('.typography-toggle');
   if (!bar) return;
-  let lastY = window.scrollY;
+  var spacer = document.createElement('div');
+  bar.parentNode.insertBefore(spacer, bar.nextSibling);
+
   window.addEventListener('scroll', function() {
-    const currentY = window.scrollY;
-    if (currentY < lastY) {
-      bar.classList.remove('typography-toggle-hidden');
-    } else if (currentY > lastY && currentY > bar.offsetHeight) {
-      bar.classList.add('typography-toggle-hidden');
+    if (window.scrollY > 0) {
+      if (!bar.classList.contains('typography-toggle-fixed')) {
+        bar.style.top = '0';
+        bar.classList.add('typography-toggle-fixed');
+        spacer.style.height = bar.offsetHeight + 'px';
+      }
+    } else {
+      if (bar.classList.contains('typography-toggle-fixed')) {
+        bar.style.top = '';
+        bar.classList.remove('typography-toggle-fixed');
+        spacer.style.height = '0';
+      }
     }
-    lastY = currentY;
   }, { passive: true });
 })();
 
-loadScript(local_app.localsite_root() + 'js/navigation.js', function() {
-  initializeTypographyDemo();
-});
+(function waitForjQuery() {
+  if (typeof $ === 'function' && typeof local_app !== 'undefined' && typeof local_app.localsite_root === 'function') {
+    loadScript(local_app.localsite_root() + 'js/navigation.js', function() {
+      if (typeof populateStylelookSelect === 'function') {
+        initializeTypographyDemo();
+      } else {
+        var navEl = document.querySelector('script[src*="navigation.js"]');
+        if (navEl) navEl.addEventListener('load', initializeTypographyDemo);
+      }
+    });
+  } else {
+    setTimeout(waitForjQuery, 50);
+  }
+})();
 </script>
 
 <div id="aboutStyleDivHolder" class="content contentpadding">

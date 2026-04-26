@@ -28,5 +28,5 @@ pnpm build
 ## Theme files
 
 CSS files in `themes/` are the source of truth.
-`localsite/css/styles/index.html` loads them from `/sveltia-cms/themes/`.
+`cms/themes/index.html` loads them from `/sveltia-cms/themes/`.
 Do not duplicate them back into localsite.

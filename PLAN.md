@@ -26,12 +26,12 @@ served from `package/dist/sveltia-cms.js`.
 ---
 
 ### Also done (theming — originally planned as PR 2, merged into PR 1)
-- [x] `themes/` folder — CSS files moved from `localsite/css/styles/`
+- [x] `themes/` folder — CSS files moved from `cms/themes/`
 - [x] Each theme file — `--sui-base-hue` and `--sui-font-family-default` added
       so the Sveltia CMS UI (toolbar, inputs, buttons) inherits each theme
 - [x] `themes/index.html` — preview page for all themes
 - [x] `themes/README.md` — usage docs, theme table, `--sui-*` variable reference
-- [x] `localsite/css/styles/index.html` — updated to load from `/sveltia-cms/themes/`
+- [x] `cms/themes/index.html` — updated to load from `/sveltia-cms/themes/`
 
 ---
 

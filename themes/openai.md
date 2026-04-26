@@ -4,7 +4,7 @@ This theme is a solid approximation of the current OpenAI / ChatGPT UI language 
 
 ## Review
 
-The strongest parts of [`openai.css`](/Users/Loren/Documents/webroot/localsite/css/styles/openai.css) are the surface and control decisions:
+The strongest parts of [`openai.css`](/cms/themes/openai.css) are the surface and control decisions:
 
 - The light theme uses a soft off-white page (`#f7f7f2`) instead of flat white, which gets closer to ChatGPT’s quieter canvas.
 - The dark theme lands on the expected near-charcoal surfaces (`#171717` and `#212121`) rather than pure black, which matches the product better.
