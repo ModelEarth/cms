@@ -59,7 +59,8 @@
       extraCSS = extra_css;
 
       extra_js.forEach((src) => {
-        if (!document.querySelector(`script[src="${src}"]`)) {
+        const base = src.split('?')[0];
+        if (!document.querySelector(`script[src="${src}"]`) && !document.querySelector(`script[src^="${base}"]`)) {
           const s = document.createElement('script');
           s.src = src;
           s.async = true;
