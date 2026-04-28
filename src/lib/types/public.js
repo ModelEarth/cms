@@ -1009,11 +1009,13 @@
  * Global, collection-level or collection file-level i18n options. See the
  * [documentation](https://sveltiacms.app/en/docs/i18n) for details.
  * @typedef {object} I18nOptions
- * @property {I18nFileStructure} structure File structure for entry collections. File/singleton
- * collection must define the structure using `{{locale}}` in the `file` option.
- * `multiple_folders_i18n_root` has been deprecated in favor of `multiple_root_folders`. See the
+ * @property {I18nFileStructure} [structure] File structure for entry collections. **Required for
+ * the global i18n options**. File/singleton collection must define the structure using `{{locale}}`
+ * in the `file` option. `multiple_folders_i18n_root` has been deprecated in favor of
+ * `multiple_root_folders`. See the
  * [documentation](https://sveltiacms.app/en/docs/i18n#managing-content-structure) for details.
- * @property {LocaleCode[]} locales List of all available locales.
+ * @property {LocaleCode[]} [locales] List of all available locales. **Required for the global i18n
+ * options**.
  * @property {LocaleCode} [default_locale] Default locale. Default: first locale in the `locales`
  * option.
  * @property {LocaleCode[] | 'all' | 'default'} [initial_locales] Locales to be enabled when
@@ -1295,6 +1297,11 @@
  * `true`.
  * @property {boolean} [duplicate] Whether to allow users to duplicate entries in the collection.
  * Default: `true`.
+ * @property {boolean | { key: string }} [reorder] Whether to allow users to reorder entries in the
+ * collection. Default: `false`. If set to `true`, entries can be reordered with a drag-and-drop UI,
+ * and the numeric order starting from 1 is saved in an automatically generated `order` field. If an
+ * object with a `key` property is provided, e.g. `{ key: 'weight' }`, the specified field is used
+ * to save the order instead of the default `order` field.
  * @property {FileExtension} [extension] File extension. Default: `md`.
  * @property {FieldKeyPath} [identifier_field] Field name to be used as the title and slug of an
  * entry. Default: `title`.
