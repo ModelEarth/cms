@@ -5,49 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Color Palette & CSS Framework</title>
 
-<script>
-(function() {
-  fetch('/config.yaml')
-    .then(function(r) { return r.ok ? r.text() : ''; })
-    .then(function(text) {
-      if (!text) return;
-      // Minimal YAML list parser for extra_css / extra_js
-      function parseList(key, src) {
-        var re = new RegExp('(?:^|\\n)' + key + ':[\\s\\S]*?(?=\\n\\S|$)');
-        var block = (src.match(re) || [''])[0];
-        var items = [];
-        block.replace(/^\s+-\s+(.+)$/mg, function(_, v) {
-          v = v.trim();
-          if (v && v[0] !== '#') items.push(v);
-        });
-        return items;
-      }
-      parseList('extra_css', text).forEach(function(href) {
-        var l = document.createElement('link');
-        l.rel = 'stylesheet'; l.href = href;
-        document.head.appendChild(l);
-      });
-      parseList('extra_js', text).forEach(function(src) {
-        var s = document.createElement('script');
-        s.src = src; s.async = true;
-        document.head.appendChild(s);
-      });
-    });
-})();
-</script>
+<!-- TO DO: Remove use of localsite -->
+<link type="text/css" rel="stylesheet" href="/localsite/css/base.css" id="/localsite/css/base.css" />
+<script type="text/javascript" src="/localsite/js/localsite.js?showheader=true"></script>
 
+<!--
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+-->
+
 <link rel="stylesheet" href="palette.css">
 <link rel="stylesheet" href="heatmap.css">
-<link rel="stylesheet" href="claude.css">
-<link rel="stylesheet" href="openai.css">
-<link rel="stylesheet" href="codex.css">
-<link rel="stylesheet" href="grok.css">
-<link rel="stylesheet" href="xai.css">
-<link rel="stylesheet" href="georgia.css">
-<link rel="stylesheet" href="notion.css">
+
 <script>
 function updateStyleAbout(typographyValue) {
   const aboutStyleDivHolder = document.getElementById('aboutStyleDivHolder');
