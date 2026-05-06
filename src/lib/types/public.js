@@ -104,11 +104,8 @@
  */
 
 /**
- * Configuration for the default media storage.
- * @typedef {object} DefaultMediaLibraryConfig
- * @property {boolean} [multiple] Whether to allow multiple file selection in the media storage.
- * This option is available for compatibility with the Cloudinary and Uploadcare media storage
- * providers, but you can simply use the `multiple` option for the File/Image field types instead.
+ * Shared options that apply to all media libraries.
+ * @typedef {object} SharedMediaLibraryOptions
  * @property {number} [max_file_size] Maximum file size in bytes that can be accepted for uploading.
  * @property {boolean} [slugify_filename] Whether to rename an original asset file when saving it,
  * according to the global `slug` option. Default: `false`, meaning that the original file name is
@@ -118,10 +115,23 @@
  * original format like `png` or `jpeg`. It can also be `raster_image` that matches any supported
  * raster image format. See the
  * [documentation](https://sveltiacms.app/en/docs/media/internal#image-optimization) for details.
+ */
+
+/**
+ * Configuration for the default media storage.
+ * @typedef {object} DefaultMediaLibraryBaseConfig
+ * @property {boolean} [multiple] Whether to allow multiple file selection in the media storage.
+ * This option is available for compatibility with the Cloudinary and Uploadcare media storage
+ * providers, but you can simply use the `multiple` option for the File/Image field types instead.
  * @see https://decapcms.org/docs/widgets/#File
  * @see https://decapcms.org/docs/widgets/#Image
  * @see https://sveltiacms.app/en/docs/fields/file
  * @see https://sveltiacms.app/en/docs/fields/image
+ */
+
+/**
+ * Configuration for the default media storage.
+ * @typedef {SharedMediaLibraryOptions & DefaultMediaLibraryBaseConfig} DefaultMediaLibraryConfig
  */
 
 /**
@@ -212,6 +222,9 @@
  * Unified media storage option that supports multiple storage providers. See the
  * [documentation](https://sveltiacms.app/en/docs/media#configuration) for details.
  * @typedef {object} MediaLibraries
+ * @property {SharedMediaLibraryOptions} [all] Default options that apply to all internal and cloud
+ * media libraries, except for Cloudinary, which uses its own widget. These options can be
+ * overridden by library-specific options.
  * @property {DefaultMediaLibrary | false} [default] Options for the default media storage. Set to
  * `false` to explicitly disable the default (internal) storage.
  * @property {CloudinaryMediaLibrary | false} [cloudinary] Options for the Cloudinary media storage.
@@ -1416,6 +1429,9 @@
  * @property {boolean} [allow_token_auth] Whether to allow users to authenticate using an access
  * token. Default: `true`. If set to `false`, the “Sign In Using Access Token” button will be
  * disabled in the UI, and users will be forced to use OAuth authentication.
+ * @property {boolean} [include_credentials] Whether to include credentials in API requests.
+ * Default: `false`. If set to `true`, credentials such as cookies will be included in API requests.
+ * This is only necessary when using cookie-based authentication with a self-hosted Git backend.
  * @see https://decapcms.org/docs/backends-overview/
  * @see https://sveltiacms.app/en/docs/backends
  */
