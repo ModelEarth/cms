@@ -1,28 +1,23 @@
-import { get } from 'svelte/store';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { getUserProfile } from '$lib/services/backends/git/gitlab/user';
 import { fetchAPI } from '$lib/services/backends/git/shared/api';
-import { user } from '$lib/services/user';
 
 // Mock dependencies
 vi.mock('$lib/services/backends/git/shared/api');
-vi.mock('$lib/services/user', () => ({
-  user: { subscribe: vi.fn() },
-}));
-vi.mock('svelte/store', () => ({
-  get: vi.fn(),
-  writable: vi.fn(() => ({ subscribe: vi.fn(), set: vi.fn(), update: vi.fn() })),
-  derived: vi.fn(() => ({ subscribe: vi.fn() })),
-  readonly: vi.fn(() => ({ subscribe: vi.fn() })),
+
+const mockUserState = vi.hoisted(() => ({ account: /** @type {any} */ (null) }));
+
+vi.mock('$lib/services/user/account.svelte', () => ({
+  user: mockUserState,
 }));
 
 describe('GitLab user service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock get function to return null initially
-    vi.mocked(get).mockReturnValue(null);
+    // Default: no user logged in
+    mockUserState.account = null;
   });
 
   describe('getUserProfile', () => {
@@ -52,6 +47,7 @@ describe('GitLab user service', () => {
         email: 'test@example.com',
         avatarURL: 'https://example.com/avatar.jpg',
         profileURL: 'https://gitlab.com/testuser',
+        bot: false,
         token: 'test-token',
         refreshToken: 'refresh-token',
       });
@@ -87,6 +83,7 @@ describe('GitLab user service', () => {
         email: 'another@example.com',
         avatarURL: 'https://gitlab.com/avatar2.jpg',
         profileURL: 'https://gitlab.com/anotheruser',
+        bot: false,
         token: 'test-token',
         refreshToken: 'refresh-token',
       });
@@ -125,6 +122,7 @@ describe('GitLab user service', () => {
         email: undefined,
         avatarURL: undefined,
         profileURL: undefined,
+        bot: false,
         token: 'test-token',
         refreshToken: undefined,
       });
@@ -139,15 +137,9 @@ describe('GitLab user service', () => {
       };
 
       // Mock the user store to return updated tokens
-      vi.mocked(get).mockImplementation((store) => {
-        if (store === user) {
-          return {
-            token: 'new-access-token', // Renewed token
-            refreshToken: 'new-refresh-token',
-          };
-        }
-
-        return null;
+      mockUserState.account = /** @type {any} */ ({
+        token: 'new-access-token', // Renewed token
+        refreshToken: 'new-refresh-token',
       });
 
       vi.mocked(fetchAPI).mockResolvedValue(mockUserResponse);
@@ -165,6 +157,7 @@ describe('GitLab user service', () => {
         email: 'test@example.com',
         avatarURL: undefined, // No avatar_url in mock response
         profileURL: undefined, // No web_url in mock response
+        bot: false,
         token: 'new-access-token', // Should use the renewed token
         refreshToken: 'new-refresh-token',
       });

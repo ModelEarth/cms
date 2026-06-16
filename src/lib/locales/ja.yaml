@@ -661,6 +661,11 @@ config:
     invalid_public_folder: 設定されているパブリックフォルダーが正しくありません。この設定は文字列でなければなりません。
     public_folder_relative_path: 設定されているパブリックフォルダーが正しくありません。この設定は「/」で始まる絶対パスでなければなりません。
     public_folder_absolute_url: パブリックフォルダーオプションの絶対 URL は Sveltia CMS では非対応です。
+    invalid_asset_collections: "`asset_collections` オプションが正しくありません。配列である必要があります。"
+    missing_asset_collection_name: アセットコレクション {$count} には `name` オプションを空でない文字列として定義する必要があります。
+    invalid_asset_collection_name: アセットコレクション名 `{$name}` は無効です。特殊文字を含めることはできません。
+    duplicate_asset_collection_name: アセットコレクション名は一意でなければなりませんが、`{$name}` が複数回使用されています。
+    asset_collection_invalid_media_folder: "`{$name}` アセットコレクションには、`media_folder` オプションを文字列として定義する必要があります。"
     invalid_collection_no_options: コレクションは `folder`、`files`、`divider` オプションのいずれかを定義する必要があります。
     invalid_collection_multiple_options: コレクションは `folder`、`files`、`divider` オプションを同時に持つことはできません。
     file_format_mismatch: 拡張子 `{$extension}` は `{$format}` 形式と一致しません。
@@ -673,6 +678,7 @@ config:
     duplicate_collection_file_name: コレクションファイル名は一意でなければなりませんが、`{$name}` が複数回使用されています。
     collection_no_fields: コレクションには少なくとも 1 つのフィールドを定義する必要があります。
     collection_file_no_fields: コレクションファイルには少なくとも 1 つのフィールドを定義する必要があります。
+    collection_file_i18n_required: コレクションファイルには、`file` パスで `locale` プレースホルダーを使用する場合、`i18n` オプションを定義する必要があります。
     missing_field_name: フィールド {$count} には `name` オプションを空でない文字列として定義する必要があります。
     invalid_field_name: フィールド名 `{$name}` は無効です。特殊文字を含めることはできません。ネストされたフィールドを作成したい場合は、[ドット表記ではなくオブジェクトフィールドを使用してください](https://sveltiacms.app/en/docs/troubleshooting#using-proper-naming-conventions)。
     duplicate_field_name: フィールド名は一意でなければなりませんが、`{$name}` が複数回使用されています。
@@ -680,6 +686,7 @@ config:
     invalid_variable_type: 変数タイプ名 `{$name}` は無効です。特殊文字を含めることはできません。
     duplicate_variable_type: 変数タイプ名は一意でなければなりませんが、`{$name}` が複数回使用されています。
     date_field_type: "Sveltia CMS では非推奨の Date フィールドタイプはサポートされていません。代わりに `type: date` オプション付きの DateTime フィールドタイプを使用してください。"
+    invalid_timezone: "無効なタイムゾーン: {$timeZone}。有効な IANA タイムゾーン識別子を使用してください。例: `America/New_York` または `Asia/Tokyo`。"
     unsupported_deprecated_option: Sveltia CMS では非推奨の `{$prop}` オプションはサポートされていません。代わりに `{$newProp}` オプションを使用してください。
     allow_multiple: Sveltia CMS では `allow_multiple` オプションはサポートされていません。代わりにデフォルトで `false` の `multiple` オプションを使用してください。
     invalid_list_field: List フィールドは `field`、`fields`、`types` オプションを同時に持つことはできません。
@@ -697,6 +704,7 @@ config:
     open_authoring_unsupported: Sveltia CMS ではまだオープンオーサリングはサポートされていません。
     nested_collections_unsupported: Sveltia CMS ではネストされたコレクションはまだサポートされていません。
     unsupported_ignored_option: "`{$prop}` オプションは Sveltia CMS ではサポートされていません。このオプションは無視されます。"
+    conflicting_timezone_options: "`picker_utc` と新しいタイムゾーンオプション (`input_timezone` または `output_utc`) の両方が設定されています。新しいオプションが優先されます。設定から `picker_utc` を削除することを検討してください。"
   compatibility_link: "詳しくは互換性情報をご覧ください: https://sveltiacms.app/en/docs/migration/netlify-decap-cms#features-not-to-be-implemented"
 local_workflow:
   indicator: ローカル

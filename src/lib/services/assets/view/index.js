@@ -11,7 +11,7 @@ import { sortAssets } from '$lib/services/assets/view/sort';
 import { backend } from '$lib/services/backends';
 import { getCollection, getCollectionLabel } from '$lib/services/contents/collection';
 import { getCollectionFile, getCollectionFileLabel } from '$lib/services/contents/collection/files';
-import { prefs } from '$lib/services/user/prefs';
+import { prefs } from '$lib/services/user/prefs.svelte';
 
 /**
  * @import { Readable, Writable } from 'svelte/store';
@@ -47,7 +47,11 @@ export const showUploadAssetsConfirmDialog = derived(
  * @see https://decapcms.org/docs/collection-folder/#media-and-public-folder
  * @see https://sveltiacms.app/en/docs/media/internal
  */
-export const getFolderLabelByCollection = ({ collectionName, fileName, internalPath }) => {
+export const getFolderLabelByCollection = ({ label, collectionName, fileName, internalPath }) => {
+  if (label) {
+    return label;
+  }
+
   if (collectionName === undefined) {
     return _(internalPath === undefined ? 'all_assets' : 'global_assets');
   }
@@ -129,7 +133,7 @@ backend.subscribe((_backend) => {
 listedAssets.subscribe((assets) => {
   selectedAssets.set([]);
 
-  if (get(prefs).devModeEnabled) {
+  if (prefs.devModeEnabled) {
     // eslint-disable-next-line no-console
     console.info('listedAssets', assets);
   }

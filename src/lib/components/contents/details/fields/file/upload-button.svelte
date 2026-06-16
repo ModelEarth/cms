@@ -3,7 +3,7 @@
   import { Alert, Button, Icon, Toast } from '@sveltia/ui';
   import { matchesShortcuts } from '@sveltia/utils/events';
 
-  import { hasMouse } from '$lib/services/user/env';
+  import { env } from '$lib/services/user/env.svelte';
 
   /**
    * @typedef {object} Props
@@ -122,7 +122,7 @@
   aria-disabled={disabled || undefined}
   tabindex={disabled ? -1 : 0}
   onclick={() => {
-    if ($hasMouse && !disabled) {
+    if (env.hasMouse && !disabled) {
       replaceMode = false;
       showSelectAssetsDialog = true;
     }
@@ -140,7 +140,7 @@
       <div role="status">
         {_('processing_files', { values: { count: multiple ? 2 : 1 } })}
       </div>
-    {:else if $hasMouse}
+    {:else if env.hasMouse}
       {#if !allowDrop}
         {_('click_to_browse')}
       {:else if isImageField}
@@ -161,7 +161,7 @@
   </Alert>
 </Toast>
 
-<style lang="scss">
+<style>
   .empty {
     display: flex;
     flex-direction: column;
@@ -222,7 +222,7 @@
 
       &:active,
       &:focus {
-        // Reset the style because the element is non-interactive on touch devices
+        /* Reset the style because the element is non-interactive on touch devices */
         background-color: var(--sui-button-background-color) !important;
       }
     }

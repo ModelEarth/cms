@@ -32,7 +32,7 @@
 /**
  * Cloud media storage name.
  * @typedef {'cloudinary' | 'uploadcare' | 'aws_s3' | 'cloudflare_r2' |
- * 'digitalocean_spaces'} CloudMediaLibraryName
+ * 'digitalocean_spaces' | 'scaleway_object_storage' | 'supabase_storage'} CloudMediaLibraryName
  */
 
 /**
@@ -176,17 +176,18 @@
  */
 
 /**
- * Options for S3-compatible media libraries (Amazon S3, Cloudflare R2, DigitalOcean Spaces).
+ * Options for S3-compatible media libraries.
  * @typedef {object} S3MediaLibrary
  * @property {string} [name] Media library name (used when configuring via legacy `media_library`).
  * @property {string} access_key_id AWS access key ID or equivalent (safe to store in config).
  * @property {string} bucket Bucket name.
- * @property {string} [region] AWS region (e.g., 'us-east-1'). Required for Amazon S3 and
- * DigitalOcean Spaces.
+ * @property {string} [region] AWS region (e.g., 'us-east-1'). Required for Amazon S3, DigitalOcean
+ * Spaces, Scaleway Object Storage, and Supabase Storage.
  * @property {string} [account_id] Cloudflare account ID. Required for Cloudflare R2.
  * @property {'default' | 'eu' | 'fedramp'} [jurisdiction] Cloudflare R2 jurisdiction. Required for
  * buckets created in the EU or FedRAMP jurisdictions; the global endpoint returns an error for
  * those buckets. Default: `'default'`.
+ * @property {string} [project_id] Supabase project reference ID. Required for Supabase Storage.
  * @property {string} [endpoint] Custom endpoint URL for S3-compatible services.
  * @property {string} [prefix] Path prefix within bucket.
  * @property {boolean} [force_path_style] Use path-style URLs instead of virtual-hosted-style.
@@ -240,6 +241,10 @@
  * Set to `false` to explicitly disable.
  * @property {S3MediaLibrary | false} [digitalocean_spaces] Options for the DigitalOcean Spaces
  * media storage. Set to `false` to explicitly disable.
+ * @property {S3MediaLibrary | false} [scaleway_object_storage] Options for the Scaleway Object
+ * Storage media storage. Set to `false` to explicitly disable.
+ * @property {S3MediaLibrary | false} [supabase_storage] Options for the Supabase Storage media
+ * storage. Set to `false` to explicitly disable.
  * @property {StockMediaLibrary | false} [stock_assets] Options for the unified stock photo/video
  * media library. Set to `false` to explicitly disable.
  */
@@ -503,6 +508,22 @@
  * If `false`, time input/output is disabled. This option is available for backward compatibility
  * with Netlify CMS; use the `format` or `type` option instead.
  * @property {boolean} [picker_utc] Whether to make the date input/output UTC. Default: `false`.
+ * This option is available for backward compatibility with Netlify/Decap CMS. The newer
+ * `input_timezone` and `output_utc` options provide more flexibility and supersede this option when
+ * explicitly set. `picker_utc: true` is equivalent to `input_timezone: 'utc'`.
+ * @property {'local' | 'utc' | string} [input_timezone] Timezone used by the date/time input. This
+ * option supersedes `picker_utc`. If set to `local`, the browser’s local timezone is used. If set
+ * to `utc`, UTC is used. A custom IANA timezone name such as `America/New_York` or `Asia/Tokyo` may
+ * also be provided as a string. Default: `local`.
+ * @property {boolean} [output_utc] Whether to convert stored values to UTC. This option supersedes
+ * `picker_utc`. If `false`, output values preserve the timezone semantics of `input_timezone`:
+ * `local` omits timezone information, `utc` appends a `Z` suffix, and custom timezones preserve
+ * their offset (e.g., `-05:00`). If `true`, the input value is converted to UTC for storage. When
+ * no custom `format` is specified, a `Z` suffix is appended to the ISO 8601 output. When a custom
+ * `format` is used, the value is stored in UTC but formatted according to that pattern — which
+ * won’t include an explicit timezone indicator unless the format itself contains `Z`. Note that
+ * `input_timezone: 'utc'` already implies UTC semantics, so `output_utc` has no additional effect
+ * in that case. Default: `false`.
  * @see https://decapcms.org/docs/widgets/#Datetime
  * @see https://sveltiacms.app/en/docs/fields/datetime
  */
@@ -838,8 +859,8 @@
  * @typedef {object} RelationFieldFilterOptions
  * @property {FieldKeyPath} field Field name.
  * @property {any[]} values One or more values to be matched. String values may contain template
- * tags — `{{fields.fieldName}}` (resolved from the current entry's field values) or `{{slug}}`
- * (resolved from the current entry's slug) — that are resolved against the entry currently being
+ * tags — `{{fields.fieldName}}` (resolved from the current entry’s field values) or `{{slug}}`
+ * (resolved from the current entry’s slug) — that are resolved against the entry currently being
  * edited. Unresolvable templates (e.g. `{{slug}}` for a new, unsaved entry) are ignored.
  * @property {boolean} [exclude] If `true`, entries matching this filter are excluded instead of
  * included. Default: `false`.
@@ -1073,6 +1094,16 @@
  */
 
 /**
+ * Body field options for front matter formats.
+ * @typedef {object} BodyFieldOptions
+ * @property {string} [key] Field name to store the body content when using a front matter format.
+ * Default: `body`.
+ * @property {boolean} [inline] Whether to store the body content in the front matter as a field
+ * along with other fields. If `false`, the body content is stored as the main content of the file,
+ * after the front matter block. Default: `false`.
+ */
+
+/**
  * Single file in a file/singleton collection.
  * @typedef {object} CollectionFile
  * @property {string} name Unique identifier for the file.
@@ -1093,6 +1124,7 @@
  * @property {string | string[]} [frontmatter_delimiter] Delimiters to be used for the front matter
  * format. This overrides the collection-level `frontmatter_delimiter` option. Default: depends on
  * the front matter type.
+ * @property {BodyFieldOptions} [body_field] Body field options for front matter formats.
  * @property {I18nOptions | boolean} [i18n] I18n options. Default: `false`.
  * @property {string} [preview_path] Preview URL path template.
  * @property {FieldKeyPath} [preview_path_date_field] Date field name used for `preview_path`.
@@ -1260,18 +1292,23 @@
  */
 
 /**
- * Common collection properties.
- * @typedef {object} CommonCollectionProps
+ * Base collection properties.
+ * @typedef {object} BaseCollectionProps
  * @property {string} name Unique identifier for the collection.
  * @property {string} [label] Label of the field to be displayed in the editor UI. Default: `name`
  * option value.
+ * @property {string} [icon] Name of a [Material Symbols
+ * icon](https://fonts.google.com/icons?icon.set=Material+Symbols) to be displayed in the collection
+ * list.
+ */
+
+/**
+ * Common collection properties.
+ * @typedef {object} CommonCollectionProps
  * @property {string} [label_singular] Singular UI label. It will be Blog Post if the `label` is
  * Blog Posts, for example. Default: `label` option value.
  * @property {string} [description] Short description of the collection to be displayed in the
  * editor UI.
- * @property {string} [icon] Name of a [Material Symbols
- * icon](https://fonts.google.com/icons?icon.set=Material+Symbols) to be displayed in the collection
- * list.
  * @property {string} [media_folder] Internal media folder path for the collection. This overrides
  * the global `media_folder` option. It can be a relative path from the project root if it starts
  * with a slash. Otherwise it’s a path relative to the entry. If this option is omitted, the global
@@ -1287,6 +1324,7 @@
  * `yaml-frontmatter`.
  * @property {string | string[]} [frontmatter_delimiter] Delimiters to be used for the front matter
  * format. Default: depends on the front matter type.
+ * @property {BodyFieldOptions} [body_field] Body field options for front matter formats.
  * @property {I18nOptions | boolean} [i18n] I18n options. Default: `false`.
  * @property {string} [preview_path] Preview URL path template.
  * @property {string} [preview_path_date_field] Date field name used for `preview_path`.
@@ -1364,7 +1402,7 @@
 /**
  * Entry collection definition. In Netlify/Decap CMS, an entry collection is called a folder
  * collection.
- * @typedef {CommonCollectionProps & EntryCollectionProps} EntryCollection
+ * @typedef {BaseCollectionProps & CommonCollectionProps & EntryCollectionProps} EntryCollection
  */
 
 /**
@@ -1377,12 +1415,25 @@
 
 /**
  * File collection definition.
- * @typedef {CommonCollectionProps & FileCollectionProps} FileCollection
+ * @typedef {BaseCollectionProps & CommonCollectionProps & FileCollectionProps} FileCollection
  */
 
 /**
  * Collection definition.
  * @typedef {EntryCollection | FileCollection} Collection
+ */
+
+/**
+ * @typedef {object} AssetCollectionProps
+ * @property {string} media_folder Internal media folder path for the collection, relative to the
+ * project root.
+ * @property {string} [public_folder] Public media folder path for an entry collection. If omitted,
+ * it defaults to the `media_folder` option value.
+ */
+
+/**
+ * Asset collection definition.
+ * @typedef {BaseCollectionProps & AssetCollectionProps} AssetCollection
  */
 
 /**
@@ -1684,6 +1735,7 @@
  * the CMS configuration file or the homepage file. They are not part of any collection and can be
  * accessed directly through the collection list. The list can also contain dividers. See the
  * [documentation](https://sveltiacms.app/en/docs/collections/singletons) for details.
+ * @property {AssetCollection[]} [asset_collections] Set of asset collections.
  * @property {I18nOptions} [i18n] Global i18n options.
  * @property {EditorOptions} [editor] Editor view options.
  * @property {OutputOptions} [output] Data output options. See the

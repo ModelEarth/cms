@@ -5,7 +5,7 @@
 
   import { hasOverlay } from '$lib/services/app/navigation';
   import { backend } from '$lib/services/backends';
-  import { isSmallScreen } from '$lib/services/user/env';
+  import { env } from '$lib/services/user/env.svelte';
 
   /**
    * @import { Snippet } from 'svelte';
@@ -65,7 +65,15 @@
   };
 
   $effect.pre(() => {
-    restoreSidebarWidth();
+    void [$hasOverlay];
+
+    // `ResizablePaneGroup` doesn’t work well when the container is inert, so we need to wait until
+    // the overlay is actually gone before restoring the sidebar width.
+    window.requestAnimationFrame(() => {
+      if (!$hasOverlay) {
+        restoreSidebarWidth();
+      }
+    });
   });
 </script>
 
@@ -77,7 +85,7 @@
   {...rest}
   bind:this={container}
 >
-  {#if $isSmallScreen || !primarySidebar || !main}
+  {#if env.isSmallScreen || !primarySidebar || !main}
     {@render primarySidebar?.()}
     {@render main?.()}
   {:else if sidebarWidth !== undefined}
@@ -97,7 +105,7 @@
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .outer {
     flex: auto;
     display: flex;
@@ -121,7 +129,7 @@
           background-color: var(--sui-primary-background-color);
         }
 
-        // Mobile header
+        /* Mobile header */
         header {
           display: flex;
           align-items: center;

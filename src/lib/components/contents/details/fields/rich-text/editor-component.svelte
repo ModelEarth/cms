@@ -8,7 +8,11 @@
   import VisibilityObserver from '$lib/components/common/visibility-observer.svelte';
   import FieldEditor from '$lib/components/contents/details/editor/field-editor.svelte';
   import ObjectHeader from '$lib/components/contents/details/fields/object/object-header.svelte';
-  import { applyTransformations } from '$lib/services/common/transformations';
+  import { TEMPLATE_TAG_REPLACE_REGEX } from '$lib/services/common/template/constants';
+  import {
+    applyTransformations,
+    TRANSFORMATION_SPLIT_REGEX,
+  } from '$lib/services/common/transformations';
   import { entryDraft } from '$lib/services/contents/draft';
   import { getDefaultValues } from '$lib/services/contents/draft/defaults';
   import { validateFields } from '$lib/services/contents/draft/validate/fields';
@@ -234,8 +238,8 @@
 
     const flatValues = flatten(_values);
 
-    const result = template.replaceAll(/{{(.+?)}}/g, (__, placeholder) => {
-      const [tag, ...transformations] = placeholder.trim().split(/\s*\|\s*/);
+    const result = template.replaceAll(TEMPLATE_TAG_REPLACE_REGEX, (__, placeholder) => {
+      const [tag, ...transformations] = placeholder.trim().split(TRANSFORMATION_SPLIT_REGEX);
       const fieldName = tag.replace(/^fields\./, '');
       let value = flatValues[fieldName];
 
@@ -257,7 +261,7 @@
 
     // Return `null` if the result (after stripping all placeholder-based content) is empty. This
     // handles the case where all field values are empty but literal text (e.g. ' — ') remains.
-    const strippedTemplate = template.replaceAll(/{{.+?}}/g, '');
+    const strippedTemplate = template.replaceAll(TEMPLATE_TAG_REPLACE_REGEX, '');
 
     if (result !== strippedTemplate && result.trim()) {
       return result.trim();
@@ -520,13 +524,13 @@
   </div>
 {/if}
 
-<style lang="scss">
+<style>
   .wrapper {
-    display: inline-block; // Cancel underline if the component is within a link
+    display: inline-block; /* Cancel underline if the component is within a link */
     border: 1px solid var(--sui-secondary-border-color);
     border-radius: 4px;
     width: 100%;
-    color: var(--sui-secondary-foreground-color); // Reset color within a link
+    color: var(--sui-secondary-foreground-color); /* Reset color within a link */
     background-color: var(--sui-primary-background-color);
     white-space: normal;
     -webkit-user-select: none;
@@ -536,7 +540,7 @@
       outline-color: var(--sui-primary-accent-color-translucent);
     }
 
-    // Make the input fields compact within the built-in image component
+    /* Make the input fields compact within the built-in image component */
     &:is([data-component-name='image'], [data-component-name='linked-image']) {
       :global {
         @media (768px <= width) {

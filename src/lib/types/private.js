@@ -3,6 +3,7 @@
  * @import { Writable } from 'svelte/store';
  * @import {
  * BackendName,
+ * BodyFieldOptions,
  * CmsConfig,
  * Collection,
  * CollectionDivider,
@@ -23,6 +24,7 @@
  * MediaField,
  * RasterImageFormat,
  * RelationField,
+ * S3MediaLibrary,
  * SelectField,
  * SelectFieldValue,
  * } from './public';
@@ -67,6 +69,7 @@
  * @property {string} [email] User email.
  * @property {string} [avatarURL] Avatar URL.
  * @property {string} [profileURL] Profile URL.
+ * @property {boolean} [bot] Whether the user is a service account.
  */
 
 /**
@@ -260,6 +263,12 @@
  */
 
 /**
+ * Resolved S3 configuration passed to core request helpers. Extends the public `S3MediaLibrary`
+ * with internal fields that providers set in their `getConfig` functions.
+ * @typedef {S3MediaLibrary & { acl?: string | false }} S3Config
+ */
+
+/**
  * External media library service, such as a stock asset provider or a cloud storage service.
  * @typedef {object} MediaLibraryService
  * @property {'stock_assets' | 'cloud_storage'} serviceType Service type.
@@ -298,8 +307,8 @@
  * @property {string} userMessage User message content.
  * @property {number} [temperature] Sampling temperature (0–1). Default is 0.3.
  * @property {number} [maxTokens] Maximum output tokens. Default is 4000.
- * @property {boolean} [thinking] Whether to enable thinking/reasoning mode. Only supported by
- * certain providers (e.g., DeepSeek). Default varies by provider.
+ * @property {boolean} [reasoning] Whether to enable reasoning mode. Only supported by certain
+ * providers (e.g., DeepSeek, Mistral AI). Default varies by provider.
  */
 
 /**
@@ -388,6 +397,7 @@
  * i18n structure into account. Entry collection only.
  * @property {string} [fullPath] File path of the default locale. File/singleton collection only.
  * @property {[string, string]} [fmDelimiters] Front matter delimiters.
+ * @property {BodyFieldOptions} [bodyField] Body field options for front matter formats.
  * @property {boolean} [yamlQuote] YAML quote configuration. DEPRECATED in favor of the global YAML
  * format options.
  */
@@ -440,6 +450,9 @@
  * associated entry.
  * @property {boolean} hasTemplateTags Whether the `internalPath` contains template tags like
  * `/assets/images/{{slug}}`, which require special handling like `entryRelative`.
+ * @property {string} [label] Label for the asset folder. Asset collections only.
+ * @property {string} [icon] Icon for the asset folder. Asset collections only.
+ * @property {boolean} [isAssetCollection] Whether the asset folder is for an asset collection.
  * @see https://decapcms.org/docs/collection-folder/#media-and-public-folder
  * @see https://sveltiacms.app/en/docs/media/internal#configuring-folder-paths
  */
@@ -738,8 +751,6 @@
  * @property {Date} timestamp When the backup was created.
  * @property {string} cmsConfigVersion The SHA-1 hash of the CMS configuration file, which is used
  * to verify that the backup can be safely restored.
- * @property {string} [siteConfigVersion] Replaced by `cmsConfigVersion`. Remove this before the 1.0
- * release.
  * @property {string} collectionName Collection name.
  * @property {string} slug Entry slug. An empty string for a new entry.
  * @property {LocaleStateMap} currentLocales Current locale state.
@@ -835,7 +846,7 @@
  */
 
 /**
- * Asset library folder map key.
+ * Asset library folder map key for standard folders.
  * @typedef {'field' | 'entry' | 'file' | 'collection' | 'global'} AssetLibraryFolderMapKey
  */
 
@@ -847,8 +858,10 @@
  */
 
 /**
- * Information about all the default asset library folders and whether these are enabled.
- * @typedef {Record<AssetLibraryFolderMapKey, AssetLibraryFolderMapValue>} AssetLibraryFolderMap
+ * Information about all the default asset library folders and whether these are enabled. The map
+ * includes standard folder keys ('field', 'entry', 'file', 'collection', 'global') and dynamic keys
+ * for asset collections (e.g., 'assets:icons', 'assets:logos').
+ * @typedef {Record<string, AssetLibraryFolderMapValue>} AssetLibraryFolderMap
  */
 
 /**
@@ -1045,6 +1058,10 @@
  * @property {boolean} dateOnly Whether the field is date only.
  * @property {boolean} timeOnly Whether the field is time only.
  * @property {boolean} utc Whether the field’s picker is UTC.
+ * @property {'local' | 'utc' | string} inputTimeZone Timezone used by the date input.
+ * @property {boolean} outputUTC Whether to convert stored values to UTC.
+ * @property {string | undefined} singleCustomTimeZone The custom timezone to use for input
+ * processing and display when exactly one custom timezone is configured, or undefined otherwise.
  */
 
 /**
@@ -1198,6 +1215,14 @@
  * @property {Set<string>} warnings Collected warning messages.
  * @property {Set<CollectedMediaField>} mediaFields Collected media fields.
  * @property {Set<CollectedRelationField>} relationFields Collected relation fields.
+ */
+
+/**
+ * Relation field option.
+ * @typedef {object} RelationOption
+ * @property {string} label Option label.
+ * @property {any} value Option value.
+ * @property {string} searchValue Searchable value.
  */
 
 /**

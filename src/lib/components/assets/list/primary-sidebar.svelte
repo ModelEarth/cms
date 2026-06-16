@@ -1,6 +1,6 @@
 <script>
   import { _, locale as appLocale } from '@sveltia/i18n';
-  import { Icon, Listbox, Option, OptionGroup } from '@sveltia/ui';
+  import { Divider, Icon, Listbox, Option, OptionGroup } from '@sveltia/ui';
   import { sleep } from '@sveltia/utils/misc';
   import equal from 'fast-deep-equal';
 
@@ -14,7 +14,7 @@
     getCollectionFile,
     getCollectionFileIndex,
   } from '$lib/services/contents/collection/files';
-  import { isSmallScreen } from '$lib/services/user/env';
+  import { env } from '$lib/services/user/env.svelte';
 
   /**
    * @typedef {object} Props
@@ -34,19 +34,35 @@
     // All Assets, Global Assets, then collection-level, file-level folders, sorted by appearance
     // order in the config
     ...$allAssetFolders
-      // Exclude field-level folders
-      .filter(({ typedKeyPath }) => typedKeyPath === undefined)
+      .filter(
+        ({ typedKeyPath, isAssetCollection }) =>
+          !isAssetCollection &&
+          // Exclude field-level folders
+          typedKeyPath === undefined,
+      )
       .sort(
         (a, b) =>
           getCollectionFileIndex(a.collectionName, a.fileName) -
           getCollectionFileIndex(b.collectionName, b.fileName),
       )
       .sort((a, b) => getCollectionIndex(a.collectionName) - getCollectionIndex(b.collectionName)),
+    // All asset collection folders, sorted by appearance order in the config
+    ...$allAssetFolders.filter(({ isAssetCollection }) => isAssetCollection),
   ]);
+
+  /**
+   * Whether to show a divider after the folder at the given index.
+   * @param {number} index Index of the folder to check.
+   * @returns {boolean} Whether to show a divider after the folder at the given index.
+   */
+  const shouldShowDivider = (index) =>
+    (folders[index].collectionName === undefined &&
+      folders[index + 1]?.collectionName !== undefined) ||
+    (!folders[index].isAssetCollection && !!folders[index + 1]?.isAssetCollection);
 </script>
 
 <div role="none" class="primary-sidebar">
-  {#if $isSmallScreen}
+  {#if env.isSmallScreen}
     <header>
       <h2>{_('assets')}</h2>
     </header>
@@ -59,7 +75,7 @@
   {/if}
   <Listbox aria-label={_('asset_folder_list')} aria-controls="assets-container">
     <OptionGroup label={_('asset_location.repository')}>
-      {#each folders as folder ([folder.collectionName, folder.fileName, folder.internalPath].join(':'))}
+      {#each folders as folder, index ([folder.collectionName, folder.fileName, folder.internalPath].join(':'))}
         {#await sleep() then}
           {@const { collectionName, fileName, internalPath, entryRelative, hasTemplateTags } =
             folder}
@@ -70,7 +86,7 @@
           {@const uploadDisabled = entryRelative || hasTemplateTags}
           {@const selected = equal($selectedAssetFolder, folder)}
           <Option
-            selected={$isSmallScreen || isSearchPage ? false : selected}
+            selected={env.isSmallScreen || isSearchPage ? false : selected}
             label={appLocale.current ? getFolderLabelByCollection(folder) : ''}
             onSelect={() => {
               goto(`/assets/${internalPath ?? '-/all'}`, {
@@ -126,7 +142,7 @@
             }}
           >
             {#snippet startIcon()}
-              <Icon name={collectionFile?.icon || collection?.icon || 'folder'} />
+              <Icon name={folder.icon || collectionFile?.icon || collection?.icon || 'folder'} />
             {/snippet}
             {#snippet endIcon()}
               {#key $allAssets}
@@ -142,6 +158,9 @@
             {/snippet}
           </Option>
         {/await}
+        {#if shouldShowDivider(index)}
+          <Divider />
+        {/if}
       {/each}
     </OptionGroup>
     <!-- @todo Add external locations, including Cloudinary and Uploadcare -->

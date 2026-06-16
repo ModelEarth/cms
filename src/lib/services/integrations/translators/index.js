@@ -1,11 +1,12 @@
-import { derived } from 'svelte/store';
+import { toStore } from 'svelte/store';
 
-import { prefs } from '$lib/services/user/prefs';
+import { prefs } from '$lib/services/user/prefs.svelte';
 
 import anthropic from './anthropic';
 import deepseek from './deepseek';
 import google from './google';
 import googleAi from './google-ai';
+import mistral from './mistral';
 import openai from './openai';
 
 /**
@@ -22,14 +23,15 @@ export const allTranslationServices = {
   deepseek,
   google,
   'google-ai': googleAi,
+  mistral,
   openai,
 };
 
 /**
  * @type {Readable<TranslationService>}
  */
-export const translator = derived([prefs], ([$prefs]) => {
-  const { defaultTranslationService = 'google' } = $prefs;
+export const translator = toStore(() => {
+  const { defaultTranslationService = 'google' } = prefs;
 
   return allTranslationServices[defaultTranslationService] ?? google;
 });

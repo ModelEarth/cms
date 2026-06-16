@@ -27,8 +27,8 @@
   import { processFile } from '$lib/services/assets/process';
   import { cmsConfig } from '$lib/services/config';
   import { selectAssetsView } from '$lib/services/contents/editor';
-  import { isSmallScreen } from '$lib/services/user/env';
-  import { prefs } from '$lib/services/user/prefs';
+  import { env } from '$lib/services/user/env.svelte';
+  import { prefs } from '$lib/services/user/prefs.svelte';
 
   /**
    * @import {
@@ -132,41 +132,6 @@
   };
 
   /**
-   * Handle `Drop` event to upload files.
-   * @param {File[]} files Dropped files.
-   */
-  export const uploadFiles = async (files) => {
-    if (!upload) {
-      return;
-    }
-
-    const processed = await Promise.all(files.map((f) => processFile(f, allMediaLibraryOptions)));
-
-    files = processed.filter(({ oversized }) => !oversized).map(({ file }) => file);
-
-    oversizedFileNames = processed
-      .filter(({ oversized }) => oversized)
-      .map(({ file }) => file.name);
-
-    if (oversizedFileNames.length) {
-      showOversizeAlert = true;
-    }
-
-    if (!files.length) {
-      return;
-    }
-
-    uploadingToast = { show: true, status: 'info', length: files.length };
-
-    try {
-      await upload(files, listFetchOptions);
-      getAssets();
-    } catch {
-      uploadingToast = { show: true, status: 'error', length: files.length };
-    }
-  };
-
-  /**
    * Download the selected asset, if needed, and return the file and credit. If hotlinking is
    * required by the service, just return the URL instead of downloading the file.
    * @param {ExternalAsset} asset Selected asset.
@@ -199,6 +164,44 @@
     }
 
     return undefined;
+  };
+
+  /**
+   * Handle `Drop` event to upload files.
+   * @param {File[]} files Dropped files.
+   */
+  export const uploadFiles = async (files) => {
+    if (!upload) {
+      return;
+    }
+
+    const processed = await Promise.all(files.map((f) => processFile(f, allMediaLibraryOptions)));
+
+    files = processed.filter(({ oversized }) => !oversized).map(({ file }) => file);
+
+    oversizedFileNames = processed
+      .filter(({ oversized }) => oversized)
+      .map(({ file }) => file.name);
+
+    if (oversizedFileNames.length) {
+      showOversizeAlert = true;
+    }
+
+    if (!files.length) {
+      return;
+    }
+
+    uploadingToast = { show: true, status: 'info', length: files.length };
+
+    try {
+      const uploaded = await upload(files, listFetchOptions);
+      const resources = await Promise.all(uploaded.map((asset) => getResource(asset)));
+
+      selectedResources = resources.filter((r) => !!r).slice(0, multiple ? undefined : 1);
+      listedAssets = [...uploaded, ...(listedAssets ?? [])];
+    } catch {
+      uploadingToast = { show: true, status: 'error', length: files.length };
+    }
   };
 
   /**
@@ -238,8 +241,8 @@
         return;
       }
 
-      apiKey = $prefs.apiKeys?.[serviceId] ?? '';
-      [userName, password] = ($prefs.logins?.[serviceId] ?? '').split(' ');
+      apiKey = prefs.apiKeys?.[serviceId] ?? '';
+      [userName, password] = (prefs.logins?.[serviceId] ?? '').split(' ');
       hasAuthInfo = authType === 'none' || !!apiKey || !!password;
       listedAssets = null;
     })();
@@ -288,7 +291,7 @@
                   variant="tile"
                   crossorigin="anonymous"
                 />
-                {#if viewType === 'list' || (!$isSmallScreen && !isStockAssets)}
+                {#if viewType === 'list' || (!env.isSmallScreen && !isStockAssets)}
                   <AssetPath
                     path={isStockAssets ? undefined : description}
                     caption={isStockAssets ? description : undefined}
@@ -364,8 +367,8 @@
             if (apiKeyPattern?.test(_value)) {
               apiKey = _value;
               hasAuthInfo = true;
-              $prefs.apiKeys ??= {};
-              $prefs.apiKeys[serviceId] = apiKey;
+              prefs.apiKeys ??= {};
+              prefs.apiKeys[serviceId] = apiKey;
               getAssets();
             }
           }}
@@ -405,8 +408,8 @@
               userName = input.userName;
               password = input.password;
               hasAuthInfo = true;
-              $prefs.logins ??= {};
-              $prefs.logins[serviceId] = [userName, password].join(' ');
+              prefs.logins ??= {};
+              prefs.logins[serviceId] = [userName, password].join(' ');
               getAssets();
             } else {
               authState = 'error';
@@ -435,7 +438,7 @@
 
 <OversizeAlertDialog bind:open={showOversizeAlert} {oversizedFileNames} {maxSize} />
 
-<style lang="scss">
+<style>
   .grid-wrapper {
     overflow-y: auto;
     height: 100%;

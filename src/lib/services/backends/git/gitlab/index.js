@@ -16,11 +16,13 @@ import { checkStatus, STATUS_DASHBOARD_URL } from '$lib/services/backends/git/gi
 import { apiConfig, graphqlVars } from '$lib/services/backends/git/shared/api';
 import { getRepoURL } from '$lib/services/backends/git/shared/repository';
 import { cmsConfig } from '$lib/services/config';
-import { prefs } from '$lib/services/user/prefs';
+import { prefs } from '$lib/services/user/prefs.svelte';
 
 /**
  * @import { ApiEndpointConfig, BackendService, RepositoryInfo } from '$lib/types/private';
  */
+
+const REPO_PATH_REGEX = /(?<owner>.+)\/(?<repo>[^/]+)$/;
 
 /**
  * Initialize the GitLab backend.
@@ -54,9 +56,7 @@ export const init = () => {
    * @see https://docs.gitlab.com/user/namespace/
    * @see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/80055
    */
-  const { owner, repo } =
-    /** @type {string} */ (projectPath).match(/(?<owner>.+)\/(?<repo>[^/]+)$/)?.groups ?? {};
-
+  const { owner, repo } = /** @type {string} */ (projectPath).match(REPO_PATH_REGEX)?.groups ?? {};
   const repoPath = `${owner}/${repo}`;
   const authURL = `${stripSlashes(authRoot)}/${stripSlashes(authPath)}`;
   const repoURL = getRepoURL(restApiRoot, repoPath);
@@ -96,7 +96,7 @@ export const init = () => {
     branch,
   });
 
-  if (get(prefs).devModeEnabled) {
+  if (prefs.devModeEnabled) {
     // eslint-disable-next-line no-console
     console.info('repositoryInfo', repository);
   }

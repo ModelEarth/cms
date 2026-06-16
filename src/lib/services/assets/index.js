@@ -1,5 +1,5 @@
 import { getPathInfo } from '@sveltia/utils/file';
-import { stripSlashes } from '@sveltia/utils/string';
+import { escapeRegExp, stripSlashes } from '@sveltia/utils/string';
 import { flatten } from 'flat';
 import { derived, get, writable } from 'svelte/store';
 
@@ -11,6 +11,10 @@ import {
 } from '$lib/services/assets/folders';
 import { processFile } from '$lib/services/assets/process';
 import { fillTemplate } from '$lib/services/common/template';
+import {
+  ESCAPED_PLACEHOLDER_REGEX,
+  TEMPLATE_TAG_REGEX,
+} from '$lib/services/common/template/constants';
 import { getCollection } from '$lib/services/contents/collection';
 import { isCollectionIndexFile } from '$lib/services/contents/collection/entries/index-file';
 import { getCollectionFilesByEntry } from '$lib/services/contents/collection/files';
@@ -31,6 +35,8 @@ import { createPath, decodeFilePath, resolvePath } from '$lib/services/utils/fil
  * UploadingAssets,
  * } from '$lib/types/private';
  */
+
+const ENTRY_FOLDER_REGEX = /^(?<entryFolder>.+?)(?:\/[^/]+)?$/;
 
 /**
  * List of all assets.
@@ -192,7 +198,7 @@ export const getAssetByRelativePathAndCollection = ({
   // The regex matches any non-empty string (`entryFilePath` is guaranteed non-empty above). Named
   // capture groups always produce a `groups` object, so no optional chaining needed.
   const { entryFolder } = /** @type {{ entryFolder: string }} */ (
-    /** @type {RegExpMatchArray} */ (entryFilePath.match(/(?<entryFolder>.+?)(?:\/[^/]+)?$/)).groups
+    /** @type {RegExpMatchArray} */ (entryFilePath.match(ENTRY_FOLDER_REGEX)).groups
   );
 
   // Strip the `media_folder` prefix from the stored path before joining with `mediaFolder`, to
@@ -310,9 +316,12 @@ export const getAssetByAbsolutePath = ({ path, entry, collectionName, fileName, 
     getAssetFolder({ collectionName, fileName }),
     getAssetFolder({ collectionName }),
     get(globalAssetFolder),
-    get(allAssetFolders).findLast((folder) =>
-      dirName.match(`^${(folder.publicPath ?? '').replace(/{{.+?}}/g, '.+?')}\\b`),
-    ),
+    get(allAssetFolders).findLast((folder) => {
+      const publicPath = folder.publicPath ?? '';
+      const normalizedPath = escapeRegExp(publicPath).replace(ESCAPED_PLACEHOLDER_REGEX, '.+?');
+
+      return dirName.match(`^${normalizedPath}${publicPath ? '(?=\\/|$)' : '$'}`);
+    }),
   ].filter((folder) => !!folder);
 
   // Use `find` to stop scanning folders as soon as the asset is found
@@ -321,7 +330,7 @@ export const getAssetByAbsolutePath = ({ path, entry, collectionName, fileName, 
     let { internalPath } = folder;
 
     // Deal with template tags like `/assets/images/{{slug}}`
-    if (internalPath !== undefined && /{{.+?}}/.test(internalPath)) {
+    if (internalPath !== undefined && TEMPLATE_TAG_REGEX.test(internalPath)) {
       const collection = _collectionName
         ? getCollection(_collectionName)
         : entry

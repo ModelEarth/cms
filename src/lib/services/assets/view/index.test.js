@@ -99,13 +99,8 @@ vi.mock('$lib/services/assets/view/sort', () => ({
   sortAssets: vi.fn(),
 }));
 
-vi.mock('$lib/services/user/prefs', () => ({
-  prefs: {
-    subscribe: vi.fn((callback) => {
-      callback({ devModeEnabled: false });
-      return vi.fn();
-    }),
-  },
+vi.mock('$lib/services/user/prefs.svelte', () => ({
+  prefs: { devModeEnabled: false },
 }));
 
 vi.mock('$lib/services/backends', () => ({
@@ -351,6 +346,29 @@ describe('assets/view/index', () => {
 
       expect(result).toBe('nonexistent › some-file');
       expect(getCollectionFile).not.toHaveBeenCalled();
+    });
+
+    it('should return provided label without calling collection functions', async () => {
+      const { getCollection, getCollectionLabel } =
+        await import('$lib/services/contents/collection');
+
+      vi.clearAllMocks();
+
+      const folder = {
+        label: 'Custom Folder Label',
+        collectionName: 'blog',
+        fileName: 'featured',
+        internalPath: 'static/blog/featured',
+        publicPath: '/static/blog/featured',
+        entryRelative: false,
+        hasTemplateTags: false,
+      };
+
+      const result = getFolderLabelByCollection(folder);
+
+      expect(result).toBe('Custom Folder Label');
+      expect(getCollection).not.toHaveBeenCalled();
+      expect(getCollectionLabel).not.toHaveBeenCalled();
     });
   });
 
@@ -666,12 +684,10 @@ describe('assets/view/index', () => {
       vi.resetModules();
 
       const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
-      const { prefs } = await import('$lib/services/user/prefs');
 
-      vi.mocked(prefs.subscribe).mockImplementation((callback) => {
-        callback(/** @type {any} */ ({ devModeEnabled: false }));
-        return vi.fn();
-      });
+      vi.doMock('$lib/services/user/prefs.svelte', () => ({
+        prefs: { devModeEnabled: false },
+      }));
 
       await import('.');
 
@@ -685,12 +701,10 @@ describe('assets/view/index', () => {
       vi.resetModules();
 
       const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
-      const { prefs } = await import('$lib/services/user/prefs');
 
-      vi.mocked(prefs.subscribe).mockImplementation((callback) => {
-        callback(/** @type {any} */ ({ devModeEnabled: true }));
-        return vi.fn();
-      });
+      vi.doMock('$lib/services/user/prefs.svelte', () => ({
+        prefs: { devModeEnabled: true },
+      }));
 
       await import('.');
 

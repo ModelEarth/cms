@@ -1,7 +1,4 @@
 allowBuilds:
-  "@parcel/watcher": false
-  esbuild: false
-  svelte-preprocess: true
   unrs-resolver: false
 
 engineStrict: true
@@ -11,8 +8,11 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - "@sveltia/*"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   # Apply bug fix
   # https://github.com/sveltejs/svelte-preprocess/releases/tag/svelte-preprocess%406.0.5
   - svelte-preprocess
+>>>>>>> upstream/main
+=======
 >>>>>>> upstream/main
