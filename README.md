@@ -8,7 +8,7 @@ As the de facto [successor to Netlify CMS](https://sveltiacms.app/en/docs/succes
 
 Sveltia CMS is framework-agnostic and can also be used for vanilla JavaScript sites. It’s a great choice for people leaving a traditional CMS or website builder and looking for a lightweight headless CMS that seamlessly integrates with a static site generator (SSG), such as Astro, Eleventy, and Hugo.
 
-Explore 280+ real-world examples in our [showcase](https://sveltiacms.app/en/showcase), including 105+ sites migrated from Netlify/Decap CMS and 45+ from WordPress, or visit the [documentation](https://sveltiacms.app/en/docs) to get started.
+Explore 290+ real-world examples in our [showcase](https://sveltiacms.app/en/showcase), including 110+ sites migrated from Netlify/Decap CMS and 45+ from WordPress, or visit the [documentation](https://sveltiacms.app/en/docs) to get started.
 
 [![Sveltia CMS: Fast, Git-based, Headless, Modern UX, Mobile Support, I18n Support, Open Source](https://sveltiacms.app/images/highlights/cover.webp)](https://sveltiacms.app/en/)
 
@@ -27,13 +27,13 @@ We provide comprehensive documentation to help you get started and make the most
 
 ## Showcase
 
-Our [industry-leading showcase](https://sveltiacms.app/en/showcase) features many real-world examples of Sveltia CMS users, including:
+Our [industry-leading showcase](https://sveltiacms.app/en/showcase) features various real-world examples of Sveltia CMS users, including:
 
-- [Examples of sites migrated from Decap CMS](https://sveltiacms.app/en/showcase?migrated-from=decap-cms)
-- [Examples of sites migrated from WordPress](https://sveltiacms.app/en/showcase?migrated-from=wordpress)
-- [Examples of sites built with Astro](https://sveltiacms.app/en/showcase?framework=astro)
-- [Examples of sites built with Eleventy](https://sveltiacms.app/en/showcase?framework=eleventy)
-- [Examples of sites using i18n support](https://sveltiacms.app/en/showcase?feature=i18n)
+- [Sites migrated from Decap CMS](https://sveltiacms.app/en/showcase?migrated-from=decap-cms)
+- [Sites migrated from WordPress](https://sveltiacms.app/en/showcase?migrated-from=wordpress)
+- [Sites built with Astro](https://sveltiacms.app/en/showcase?framework=astro)
+- [Sites built with Eleventy](https://sveltiacms.app/en/showcase?framework=eleventy)
+- [Sites using i18n support](https://sveltiacms.app/en/showcase?feature=i18n)
 
 ## Community
 
