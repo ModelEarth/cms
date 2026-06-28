@@ -1,5 +1,5 @@
 /**
- * @import { ReactElement } from 'react';
+ * @import { ComponentType, ReactElement } from 'react';
  * @import { MapOf } from 'immutable';
  */
 
@@ -1885,6 +1885,10 @@
  * @see https://sveltiacms.app/en/docs/api/preview-templates
  */
 
+/**
+ * @typedef {ComponentType<CustomPreviewTemplateProps>} CustomPreviewTemplate
+ */
+
 // @todo Write descriptions for the options below
 /* eslint-disable jsdoc/require-property-description */
 
@@ -1900,6 +1904,10 @@
  */
 
 /**
+ * @typedef {ComponentType<CustomFieldControlProps>} CustomFieldControl
+ */
+
+/**
  * @typedef {object} CustomFieldPreviewProps
  * @property {any} value
  * @property {Record<string, any>} field
@@ -1909,6 +1917,10 @@
  * @property {Record<string, any>} fieldsMetaData
  * @see https://decapcms.org/docs/custom-widgets/#registerwidget
  * @see https://sveltiacms.app/en/docs/api/field-types
+ */
+
+/**
+ * @typedef {ComponentType<CustomFieldPreviewProps>} CustomFieldPreview
  */
 
 /**
